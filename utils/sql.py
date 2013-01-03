@@ -13,7 +13,7 @@ def init(db):
     db.commit()
 
 
-def get_stories(db, userid, viewing_on):
+def get_stories(db, userid, viewing_on):  # XXX viewing_on not implemented
     cur = db.cursor()
     q = '''SELECT updates.storyid FROM updates WHERE
     updates.userid = ''' + str(userid)
@@ -35,3 +35,6 @@ def add_story(db, title, userid, init_update):
 def get_title(db, storyid):
     return db.cursor().execute(
         'SELECT title FROM stories WHERE id = ' + str(storyid))[0][0]
+
+def is_edited(db, storyid, userid):
+    return storyid in get_stories(
