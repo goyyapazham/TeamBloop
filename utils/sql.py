@@ -15,8 +15,9 @@ def init(db):
 
 def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
     cur = db.cursor()
-    q = '''SELECT updates.storyid FROM updates WHERE
-    updates.userid = ''' + str(userid)
+    if viewing_on:
+        q = '''SELECT updates.storyid FROM updates WHERE
+        updates.userid = ''' + str(userid)
     res = cur.execute(q)
     return [i[0] for i in res]
 
