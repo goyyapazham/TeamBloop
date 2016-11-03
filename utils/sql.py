@@ -36,5 +36,21 @@ def get_title(db, storyid):
     return db.cursor().execute(
         'SELECT title FROM stories WHERE id = ' + str(storyid))[0][0]
 
+
 def is_edited(db, storyid, userid):
     return storyid in get_stories(db, userid)
+
+
+def get_latest_update(db, storyid):
+    return db.cursor().execute(
+        'SELECT latestid FROM stories WHERE storyid = %d'%(storyid))[0][0]
+
+
+def get_all_updates(db, storyid):
+    return [i[0] for i in db.cursor().execute(
+        'SELECT id FROM updates WHERE storyid = %d'%(storyid))]
+
+
+def get_update(db, updateid):
+    return [i[0] for i in db.cursor().execute(
+        'SELECT content FROM updates WHERE updates.id = %d'%(updateid))
