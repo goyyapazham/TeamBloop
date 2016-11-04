@@ -10,13 +10,15 @@ def init(db):
         'CREATE TABLE stories (id INTEGER, title TEXT, latestid INTEGER)')
     cur.execute('''CREATE TABLE updates
         (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)''')
+    cur.execute('''INSERT INTO stories VALUES (-1, "", -1)''')
     db.commit()
 
 
 def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
     cur = db.cursor()
-    q = '''SELECT updates.storyid FROM updates WHERE
-    updates.userid = ''' + str(userid)
+    if viewing_on:
+        q = '''SELECT updates.storyid FROM updates WHERE
+        updates.userid = ''' + str(userid)
     res = cur.execute(q)
     return [i[0] for i in res]
 
@@ -25,16 +27,18 @@ def add_story(db, title, userid, init_update):
     cur = db.cursor()
     res = cur.execute('SELECT id FROM stories')
     newid = max([i[0] for i in res]) + 1
-    cur.execute('''INSERT INTO updates VALUES
-    (0, ''' + str(userid) + ', ' + str(newid) + ', ' + init_update + ')')
+    cur.execute('INSERT INTO updates VALUES (0, '
+        + str(userid) + ', ' + str(newid) + ', "' + init_update + '")')
     cur.execute(
-        'INSERT INTO stories VALUES (' + str(newid) + ', ' + title + ', 0)')
+        'INSERT INTO stories VALUES (' + str(newid) + ', "' + title + '", 0)')
     db.commit()
 
 
 def get_title(db, storyid):
-    return db.cursor().execute(
-        'SELECT title FROM stories WHERE id = ' + str(storyid))[0][0]
+    title_holder = db.cursor().execute(
+        'SELECT title FROM stories WHERE id = ' + str(storyid))
+    for i in title_holder:
+        return i[0]
 
 
 def is_edited(db, storyid, userid):
@@ -42,8 +46,10 @@ def is_edited(db, storyid, userid):
 
 
 def get_latest_update(db, storyid):
-    return db.cursor().execute(
-        'SELECT latestid FROM stories WHERE storyid = %d'%(storyid))[0][0]
+    c_h = db.cursor().execute(
+        'SELECT latestid FROM stories WHERE id = %d'%(storyid))
+    for i in c_h:
+        return i[0]
 
 
 def get_all_updates(db, storyid):
@@ -53,4 +59,9 @@ def get_all_updates(db, storyid):
 
 def get_update(db, updateid):
     return [i[0] for i in db.cursor().execute(
-        'SELECT content FROM updates WHERE updates.id = %d'%(updateid))
+        'SELECT content FROM updates WHERE id = %d'%(updateid))]
+
+
+if __name__ == '__main__':  #tests
+    db = sql.connect('b.db')  # test database
+    # execute with python -i utils/sql.py, then test functions in interpreter
