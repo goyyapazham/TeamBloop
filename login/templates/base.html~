@@ -1,0 +1,11 @@
+<!DOCTYPE HTML>
+<HTML>
+  <head>
+    <h1><center><font size = '20' color='blue'>{{q}}!</font></h1>
+  </head>
+  <body>
+  <form action = "/bye/" method="Post" action= "login.py">
+  <input type="submit" >Bye</>
+  </form>
+  </body>
+</HTML>
