@@ -11,6 +11,9 @@ def init(db):
     cur.execute('''CREATE TABLE updates
         (id INTEGER, userid INTEGER, storyid INTEGER)''')
     cur.execute('''INSERT INTO stories VALUES (-1, "", -1)''')
+    cur.execute('''INSERT INTO updates VALUES (-1, -1, -1)''')
+    cur.execute('''INSERT INTO users VALUES (-1, "", "")''')
+    # need base, unused data to do next id functions
     db.commit()
 
 
@@ -25,12 +28,23 @@ def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
 
 def add_story(db, title, userid, init_update):
     cur = db.cursor()
-    res = cur.execute('SELECT id FROM stories')
-    newid = max([i[0] for i in res]) + 1
-    cur.execute('INSERT INTO updates VALUES (0, '
-        + str(userid) + ', ' + str(newid) + ', "' + init_update + '")')
+    newid = next_storyid(db)
+    newupid = next_updateid(db)
     cur.execute(
-        'INSERT INTO stories VALUES (' + str(newid) + ', "' + title + '", 0)')
+        'INSERT INTO stories VALUES (' + str(newid)
+        + ', "' + title + '",' + str(newupid) + ')')
+    db.commit()
+    add_update(db, userid, newid, init_update)
+
+
+def add_update(db, userid, storyid, content):
+    cur = db.cursor()
+    upid = next_updateid(db)
+    cur.execute(
+        'INSERT INTO updates VALUES(' + str(upid)
+        + ',' + str(userid) + ',' + str(storyid) + ')')
+    with open('data/' + str(upid) + '.txt', 'w') as f:
+        f.write(content)
     db.commit()
 
 
@@ -61,6 +75,7 @@ def get_update(updateid):  # ONLY function that doesn't use database, takes uid 
     with open(str(updateid) + '.txt') as f:
         return f.read()
 
+    
 def next_updateid(db):
     uids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM updates')]
@@ -80,5 +95,5 @@ def next_userid(db):
 
 
 if __name__ == '__main__':  #tests
-    db = sql.connect('b.db')  # test database
+    db = sql.connect('test.db')  # test database
     # execute with python -i utils/sql.py, then test functions in interpreter
