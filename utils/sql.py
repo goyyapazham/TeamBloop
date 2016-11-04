@@ -9,7 +9,7 @@ def init(db):
     cur.execute(
         'CREATE TABLE stories (id INTEGER, title TEXT, latestid INTEGER)')
     cur.execute('''CREATE TABLE updates
-        (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)''')
+        (id INTEGER, userid INTEGER, storyid INTEGER)''')
     cur.execute('''INSERT INTO stories VALUES (-1, "", -1)''')
     db.commit()
 
@@ -57,9 +57,26 @@ def get_all_updates(db, storyid):
         'SELECT id FROM updates WHERE storyid = %d'%(storyid))]
 
 
-def get_update(db, updateid):
-    return [i[0] for i in db.cursor().execute(
-        'SELECT content FROM updates WHERE id = %d'%(updateid))]
+def get_update(updateid):  # ONLY function that doesn't use database, takes uid and accesses file
+    with open(str(updateid) + '.txt') as f:
+        return f.read()
+
+def next_updateid(db):
+    uids = [i[0] for i in db.cursor().execute(
+        'SELECT id FROM updates')]
+    return max(uids) + 1
+
+
+def next_storyid(db):
+    sids = [i[0] for i in db.cursor().execute(
+        'SELECT id FROM stories')]
+    return max(sids) + 1
+
+
+def next_userid(db):
+    uids = [i[0] for i in db.cursor().execute(
+        'SELECT id FROM users')]
+    return max(uids) + 1
 
 
 if __name__ == '__main__':  #tests
