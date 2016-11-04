@@ -1,0 +1,10 @@
+<html>
+<form name = "input" method="POST" action= "a.py">
+<br>
+Name:<input type="text" name="user" value="Harambe" required>
+<br>
+Password:<input type="text" name="password" value="123" required>
+<br>
+<a href="/authenticate/">Submit</a>
+</form>
+</html>
