@@ -34,7 +34,16 @@ def reg():
 @app.route("/welcome/", methods = ['GET'])
 def welcome():
      return render_template("main.html", user = session["user"], dict = {"Story":"Bob"})
-
+	 
+@app.route("/newstory/", methods = ['GET'])
+def newstory():
+	return render_template("newstory.html")
+	
+@app.route("/addnewstory/", methods = ['POST'])
+def addnewstory():
+	#sql.add_story("users.db", request.form['title'], userid, init_update):
+	return redirect(url_for('welcome'))
+	
 @app.route("/bye/", methods = ['POST'])
 def bye():
      if "user" in session:

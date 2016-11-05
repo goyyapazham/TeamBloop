@@ -1,6 +1,9 @@
-import sqlite3 as sql
+import sqlite3
 import csv
 
+f="data/users.db"
+db = sqlite3.connect(f) #open if f exists, otherwise create
+c = db.cursor()
 
 def init(db):
     cur = db.cursor()
@@ -93,7 +96,7 @@ def next_userid(db):
         'SELECT id FROM users')]
     return max(uids) + 1
 
-
-if __name__ == '__main__':  #tests
-    db = sql.connect('test.db')  # test database
-    # execute with python -i utils/sql.py, then test functions in interpreter
+init(db)	
+	
+db.commit() #save changes
+db.close()  #close database
