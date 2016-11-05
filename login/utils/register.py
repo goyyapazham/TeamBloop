@@ -1,6 +1,10 @@
-from flask import request
-import csv
-import hashlib
+from flask import Flask, render_template, request, session, redirect, url_for
+import csv, hashlib, os, sqlite3
+from utils import sql
+
+f="data/users.db"
+db = sqlite3.connect(f) #open if f exists, otherwise create
+c = db.cursor()
 
 def hesh(a):
     return(hashlib.md5(a).hexdigest())

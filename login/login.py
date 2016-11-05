@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from utils import register
-import os
+from utils import register, sql
+import os, sqlite3
+
+f="data/users.db"
+db = sqlite3.connect(f) #open if f exists, otherwise create
+c = db.cursor()
 
 app = Flask(__name__)
 
@@ -16,7 +20,7 @@ def auth():
         s = register.login(request.form["user"],request.form["password"])
         if s == "Welcome":
             session["user"] = request.form["user"]
-            return render_template("main.html", user = session["user"])
+            return render_template("main.html", user = session["user"], dict = {"Story":"Bob"})
         return render_template("login.html", message = s)
 
 @app.route("/reg/", methods = ['POST'])
@@ -24,12 +28,12 @@ def reg():
         s = register.regi(request.form["user"],request.form["password"])
         if s == "Added":
             session["user"] = request.form["user"]
-            return render_template("main.html", user = session["user"])
+            return render_template("main.html", user = session["user"], dict = {"Story":"Bob"})
         return render_template("login.html", message = s)
                          
 @app.route("/welcome/", methods = ['GET'])
 def welcome():
-     return render_template("main.html", q = "So you have already logged in")
+     return render_template("main.html", q = "So you have already logged in", dict = {"Story":"Bob"})
 
 @app.route("/bye/", methods = ['POST'])
 def bye():

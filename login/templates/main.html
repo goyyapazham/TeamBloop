@@ -13,21 +13,12 @@
 			<th>Titles</th>
 			<th>Authors</th>
 		</tr>
-		{% for x in dict %}
+		{% for x in dict%}
     	<tr>
-			<td>Title</td>
-			<td>Author</td>
+			<td>{{x}}</td>
+			<td>{{dict[x]}}</td>
 		</tr>
   		{% endfor %}
-
-		<tr>
-			<td>The Quick Brown Fox</td>
-			<td>Farhan Haque</td>
-		</tr>
-		<tr>
-			<td>Once upon a time</td>
-			<td>Dr.Suess</td>
-		</tr>
 	</table>
 
 </body>
