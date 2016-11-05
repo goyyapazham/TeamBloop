@@ -14,6 +14,8 @@ def regi(a, b):
     for d in c:
         if a == d[0]:
             return "Name Taken!"
+	if len(b) < 8:
+	    return "Password Too Short, Must Be At Least 8 Characters Long"
     with open('data/name.csv', 'a') as e:
         f = csv.writer(e)
         f.writerow([a, hesh(b)])
