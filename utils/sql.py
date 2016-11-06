@@ -68,6 +68,18 @@ def get_title(storyid):
     for i in title_holder:
         return i[0]
 
+
+def get_all_users():
+    db = sqlite3.connect(f)
+    cur = db.cursor()
+    res = cur.execute("SELECT * FROM users")
+    L = []
+    for row in res:
+        L += [row[1]]
+    db.commit()
+    db.close()
+    return L
+
 #I don't understand how you've implemented this function - what is it supposed
 #to do?
 def is_edited(db, storyid, userid):
@@ -109,4 +121,15 @@ def next_userid(db):
     return max(uids) + 1
 
 
-init()
+run_init = False
+db = sqlite3.connect(f)
+cur = db.cursor()
+res = cur.execute("SELECT id FROM users")
+try:
+    if res[0] != -1:
+        run_init = True
+except:
+    if run_init:
+        init()
+db.commit()
+db.close()
