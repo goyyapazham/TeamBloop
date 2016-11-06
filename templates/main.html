@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Homepage</title>
+</head>
+
+<body>
+	<h3><center>Welcome {{user}}</center></h3>
+	<h3><center><a href="{{ url_for('newstory') }}">Start a New Story!</a></center></h3>
+	<table style= "width:100%">
+		<tr>
+			<th>Titles</th>
+			<th>Authors</th>
+		</tr>
+		{% for x in dict%}
+    	<tr>
+			<td>{{x}}</td>
+			<td>{{dict[x]}}</td>
+		</tr>
+  		{% endfor %}
+	</table>
+	
+	<form action="/bye/" method = "POST" action="login.py">
+		<center><input type= "submit" formaction = "/bye/" value= "Log Out"></center>
+    </form>
+
+</body>
+
+
+</html>
