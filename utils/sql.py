@@ -6,21 +6,15 @@ f="data/users.db"
 def init():
     db = sqlite3.connect(f)
     cur = db.cursor()
-    cur.execute(
-        'CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT, password TEXT)')
-    cur.execute(
-        'CREATE TABLE IF NOT EXISTS stories (id INTEGER, title TEXT, latestid INTEGER)')
-    cur.execute('''CREATE TABLE IF NOT EXISTS updates
-        (id INTEGER, userid INTEGER, storyid INTEGER, update TEXT)''')
-    cur.execute('''INSERT INTO stories VALUES (-1, "", -1)''')
-    cur.execute('''INSERT INTO updates VALUES (-1, -1, -1, "")''')
-    cur.execute('''INSERT INTO users VALUES (-1, "", "")''')
+    cur.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT, password TEXT)")
+    cur.execute("CREATE TABLE IF NOT EXISTS stories (id INTEGER, title TEXT, latestid INTEGER)")
+    cur.execute("CREATE TABLE IF NOT EXISTS updates (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)")
+    cur.execute("INSERT INTO stories VALUES (-1, '', -1)")
+    cur.execute("INSERT INTO updates VALUES (-1, -1, -1, '')")
+    cur.execute("INSERT INTO users VALUES (-1, '', '')")
     # need base, unused data to do next id functions
     db.commit()
     db.close()
-
-
-init()
     
 
 def add_user(user, password):
@@ -113,3 +107,6 @@ def next_userid(db):
     uids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM users')]
     return max(uids) + 1
+
+
+init()
