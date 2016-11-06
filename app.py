@@ -41,8 +41,8 @@ def newstory():
    
 @app.route("/addnewstory/", methods = ['POST'])
 def addnewstory():
-     #sql.add_story("users.db", request.form['title'], userid, init_update):
-     return redirect(url_for('welcome'))
+	sql.add_story(request.form['title'], userid, init_update):
+	return redirect(url_for('welcome'))
    
 @app.route("/bye/", methods = ['POST'])
 def bye():
