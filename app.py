@@ -33,7 +33,9 @@ def reg():
    
 @app.route("/welcome/", methods = ['GET'])
 def welcome():
-     return render_template("main.html", user = session["user"], dict = {"Story":"Bob"})
+	userid = sql.get_userid(session["user"])
+	d = get_stories(userid, viewing_on=True)
+	return render_template("main.html", user = session["user"], dict = d)
 
 @app.route("/newstory/", methods = ['GET'])
 def newstory():
@@ -41,7 +43,9 @@ def newstory():
    
 @app.route("/addnewstory/", methods = ['POST'])
 def addnewstory():
-	sql.add_story(request.form['title'], userid, init_update):
+	userid = get_userid(session["user"])
+	sql.add_story(request.form['title'], userid, 0)
+	sql.add_update(userid, sql.next_storyid(), request.form['story'])
 	return redirect(url_for('welcome'))
    
 @app.route("/bye/", methods = ['POST'])

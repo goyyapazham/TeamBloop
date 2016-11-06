@@ -26,6 +26,14 @@ def add_user(user, password):
     db.commit()
     db.close()
 
+def get_userid(user):
+    db = sqlite3.connect(f)
+    id_holder = db.cursor().execute(
+        'SELECT id FROM users WHERE username = ' + user)
+    db = sqlite3.connect(f)
+    for i in id_holder:
+        return i[0]
+	
 
 def get_stories(userid, viewing_on=True):  # XXX viewing_on not implemented
     db = sqlite3.connect(f)
@@ -109,7 +117,7 @@ def next_updateid(db):
     return max(uids) + 1
 
 
-def next_storyid(db):
+def next_storyid():
     sids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM stories')]
     return max(sids) + 1
