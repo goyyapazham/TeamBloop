@@ -26,7 +26,6 @@ def auth():
 @app.route("/reg/", methods = ['POST'])
 def reg():
      s = register.regi(request.form["user"],request.form["password"])
-     sql.add_user(request.form["user"], request.form["password"])
      if s == "Added":
           session["user"] = request.form["user"]
           return redirect(url_for('welcome'))

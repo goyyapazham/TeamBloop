@@ -6,27 +6,25 @@ f="data/users.db"
 db = sqlite3.connect(f) #open if f exists, otherwise create
 c = db.cursor()
 
-def hesh(a):
+def hash(a):
     return(hashlib.md5(a).hexdigest())
 
-def regi(a, b):
-    c = csv.reader(open("data/name.csv"))
-    for d in c:
-        if a == d[0]:
-            return "Name Taken!"
-	if len(b) < 8:
+def regi(name, pswrd):
+    c = sql.get_all_users()
+    for user in c:
+		if name == user[0]:
+			return "Name Taken!"
+    if len(pswrd) < 8:
 	    return "Password Too Short, Must Be At Least 8 Characters Long"
-    with open('data/name.csv', 'a') as e:
-        f = csv.writer(e)
-        f.writerow([a, hesh(b)])
+    sql.add_user(name, hash(pswrd))
     return "Added"
              
 
-def login(a, b):
-    c = csv.reader(open("data/name.csv"))
-    for d in c:
-        if a == d[0]:
-            if hesh(b)==d[1]:
+def login(name, pswrd):
+    c = sql.get_all_users()
+    for user in c:
+        if name == user[0]:
+            if hash(pswrd) == user[1]:
                 return "Welcome"
             return "Incorrect Password"
     return "You need to register"

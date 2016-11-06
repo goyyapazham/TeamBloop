@@ -75,7 +75,7 @@ def get_all_users():
     res = cur.execute("SELECT * FROM users")
     L = []
     for row in res:
-        L += [row[1]]
+        L += [[row[1],row[2]]]
     db.commit()
     db.close()
     return L
