@@ -1,32 +1,51 @@
-import sqlite3 as sql
+import sqlite3
 import csv
 
+f="data/users.db"
 
-def init(db):
+def init():
+    db = sqlite3.connect(f)
     cur = db.cursor()
     cur.execute(
-        'CREATE TABLE users (id INTEGER, username TEXT, password TEXT)')
+        'CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT, password TEXT)')
     cur.execute(
-        'CREATE TABLE stories (id INTEGER, title TEXT, latestid INTEGER)')
-    cur.execute('''CREATE TABLE updates
-        (id INTEGER, userid INTEGER, storyid INTEGER)''')
+        'CREATE TABLE IF NOT EXISTS stories (id INTEGER, title TEXT, latestid INTEGER)')
+    cur.execute('''CREATE TABLE IF NOT EXISTS updates
+        (id INTEGER, userid INTEGER, storyid INTEGER, update TEXT)''')
     cur.execute('''INSERT INTO stories VALUES (-1, "", -1)''')
-    cur.execute('''INSERT INTO updates VALUES (-1, -1, -1)''')
+    cur.execute('''INSERT INTO updates VALUES (-1, -1, -1, "")''')
     cur.execute('''INSERT INTO users VALUES (-1, "", "")''')
     # need base, unused data to do next id functions
     db.commit()
+    db.close()
 
 
-def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
+init()
+    
+
+def add_user(user, password):
+    db = sqlite3.connect(f)
+    cur = db.cursor()
+    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(db), user, password)
+    print q
+    cur.execute(q)
+    db.commit()
+    db.close()
+
+
+def get_stories(userid, viewing_on=True):  # XXX viewing_on not implemented
+    db = sqlite3.connect(f)
     cur = db.cursor()
     if viewing_on:
         q = '''SELECT updates.storyid FROM updates WHERE
         updates.userid = ''' + str(userid)
     res = cur.execute(q)
+    db.close()
     return [i[0] for i in res]
 
 
-def add_story(db, title, userid, init_update):
+def add_story(title, userid, init_update):
+    db = sqlite3.connect(f)
     cur = db.cursor()
     newid = next_storyid(db)
     newupid = next_updateid(db)
@@ -35,26 +54,28 @@ def add_story(db, title, userid, init_update):
         + ', "' + title + '",' + str(newupid) + ')')
     db.commit()
     add_update(db, userid, newid, init_update)
+    db.close()
 
 
-def add_update(db, userid, storyid, content):
+def add_update(userid, storyid, content):
+    db = sqlite3.connect(f)
     cur = db.cursor()
     upid = next_updateid(db)
-    cur.execute(
-        'INSERT INTO updates VALUES(' + str(upid)
-        + ',' + str(userid) + ',' + str(storyid) + ')')
-    with open('data/' + str(upid) + '.txt', 'w') as f:
-        f.write(content)
+    cur.execute("INSERT INTO updates VALUES (%d, %d, %d, \'%s\')"%(upid, userid, storyid, content))
     db.commit()
+    db.close()
 
 
-def get_title(db, storyid):
+def get_title(storyid):
+    db = sqlite3.connect(f)
     title_holder = db.cursor().execute(
         'SELECT title FROM stories WHERE id = ' + str(storyid))
+    db = sqlite3.connect(f)
     for i in title_holder:
         return i[0]
 
-
+#I don't understand how you've implemented this function - what is it supposed
+#to do?
 def is_edited(db, storyid, userid):
     return storyid in get_stories(db, userid)
 
@@ -92,8 +113,3 @@ def next_userid(db):
     uids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM users')]
     return max(uids) + 1
-
-
-if __name__ == '__main__':  #tests
-    db = sql.connect('test.db')  # test database
-    # execute with python -i utils/sql.py, then test functions in interpreter
