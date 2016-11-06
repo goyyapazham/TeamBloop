@@ -26,13 +26,17 @@ def add_user(user, password):
     db.commit()
     db.close()
 
+    
 def get_userid(user):
     db = sqlite3.connect(f)
-    id_holder = db.cursor().execute(
-        'SELECT id FROM users WHERE username = ' + user)
-    db = sqlite3.connect(f)
-    for i in id_holder:
-        return i[0]
+    id_holder = db.cursor().execute('SELECT id FROM users WHERE username = ' + user)
+    L = []
+    for row in id_holder:
+        L += [id_holder]
+    db.commit()
+    db.close()
+    return L
+    
 	
 
 def get_stories(userid, viewing_on=True):  # XXX viewing_on not implemented
@@ -72,7 +76,6 @@ def get_title(storyid):
     db = sqlite3.connect(f)
     title_holder = db.cursor().execute(
         'SELECT title FROM stories WHERE id = ' + str(storyid))
-    db = sqlite3.connect(f)
     for i in title_holder:
         return i[0]
 
@@ -88,12 +91,12 @@ def get_all_users():
     db.close()
     return L
 
-#I don't understand how you've implemented this function - what is it supposed
-#to do?
+# XXX idg this fxn
 def is_edited(db, storyid, userid):
     return storyid in get_stories(db, userid)
 
 
+# XXX yo gabe what this do?? won't it only return the first i[0] then exit
 def get_latest_update(db, storyid):
     c_h = db.cursor().execute(
         'SELECT latestid FROM stories WHERE id = %d'%(storyid))
@@ -106,7 +109,7 @@ def get_all_updates(db, storyid):
         'SELECT id FROM updates WHERE storyid = %d'%(storyid))]
 
 
-def get_update(updateid):  # ONLY function that doesn't use database, takes uid and accesses file
+def get_update(updateid):
     with open(str(updateid) + '.txt') as f:
         return f.read()
 
