@@ -93,10 +93,7 @@ def viewstory(storyid):
      updateL = sql.get_all_updates(storyid)
      for u in updateL:
 	  storyarray += [sql.get_update(u)]
-	  storystring = ""
-     for u in storyarray:
-	  storystring += u + " "
-     return render_template("viewstory.html", title = sql.get_title(storyid), story = storystring)
+     return render_template("viewstory.html", title = sql.get_title(storyid), story = storyarray)
 
    
 @app.route("/bye/", methods = ['POST'])

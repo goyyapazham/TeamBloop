@@ -7,7 +7,13 @@
 
 <body>
 	<h2><center>{{ title }}</center></h2>
-	<p><center>{{ story }}</center></p>
+	<p><center>
+	    {% for x in story %}
+	    {{ x }}
+	    <br>
+	    <br>
+	    {% endfor %}
+	</center></p>
 </body>
 
 
