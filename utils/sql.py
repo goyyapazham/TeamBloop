@@ -4,7 +4,6 @@ import csv
 f="data/users.db"
 
 
-
 def db_f(func):
     def wrapped(*args, **kwargs):  # handles locking and weird db issues
         try:
@@ -17,6 +16,7 @@ def db_f(func):
         db.close()
         return v
     return wrapped
+
 
 @db_f
 def init(db):
@@ -60,8 +60,8 @@ def add_user(db, user, password):
 
 @db_f
 def get_userid(db, user):
-    id_holder = db.cursor().execute('SELECT id FROM users WHERE username = "' + user + '"')
-    L = []
+    id_holder = db.cursor().execute(
+        "SELECT id FROM users WHERE username = \'%s\'"%(user))
     for row in id_holder:
         return row[0] 
 
@@ -69,8 +69,7 @@ def get_userid(db, user):
 @db_f
 def get_stories(db, userid, viewing_on=True):
     cur = db.cursor()
-    q = '''SELECT updates.storyid FROM updates WHERE
-        updates.userid = ''' + str(userid)
+    q = "SELECT updates.storyid FROM updates WHERE updates.userid = \'%d\'"%(int(userid))
     res = cur.execute(q)
     edited = [i[0] for i in res]
     if viewing_on:
@@ -86,8 +85,7 @@ def add_story(db, title, userid, init_update):
     newid = next_storyid(db)
     newupid = next_updateid(db)
     cur.execute(
-        'INSERT INTO stories VALUES (' + str(newid)
-        + ', "' + title + '",' + str(newupid) + ')')
+        "INSERT INTO stories VALUES (%d, \'%s\', %d)"%(newid, title, newupid))
     db.commit()
     add_update(db, userid, newid, init_update)
 
@@ -96,14 +94,15 @@ def add_story(db, title, userid, init_update):
 def add_update(db, userid, storyid, content):
     cur = db.cursor()
     upid = next_updateid(db)
-    cur.execute("INSERT INTO updates VALUES (%d, %d, %d, \'%s\')" %(upid, userid, float(storyid), content))
+    cur.execute(
+        "INSERT INTO updates VALUES (%d, %d, %d, \'%s\')" %(upid, userid, int(storyid), content))
     db.commit()
 
 
 @db_f
 def get_title(db, storyid):
     title_holder = db.cursor().execute(
-        'SELECT title FROM stories WHERE id = ' + str(storyid))
+        "SELECT title FROM stories WHERE id = %d"%(int(storyid)))
     for i in title_holder:
         return i[0]
 
@@ -134,7 +133,10 @@ def get_latest_update(db, storyid):
 
 @db_f
 def get_all_updates(db, storyid):
-    return [i[0] for i in db.cursor().execute('SELECT id FROM updates WHERE storyid = ' + str(storyid))]
+    c_h = db.cursor().execute(
+        'SELECT id FROM updates WHERE storyid = %d'%(storyid))
+    for i in c_h: #  c_h should be a singleton list, ids are unique
+        return i[0]
 
 
 @db_f
