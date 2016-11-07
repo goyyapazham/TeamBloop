@@ -11,6 +11,8 @@ def hash(a):
 
 def regi(name, pswrd):
     c = sql.get_all_users()
+    if not(name.isalnum()):
+        return "Username has bad Characters"
     for user in c:
 		if name == user[0]:
 			return "Name Taken!"
