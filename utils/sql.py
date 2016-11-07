@@ -32,6 +32,13 @@ def init(db):
 
 
 @db_f
+def query(db, q):
+    ret = db.cursor().execute(q)
+    db.commit()
+    return ret
+
+
+@db_f
 def add_user(db, user, password):
     cur = db.cursor()
     q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(db), user, password)
@@ -39,7 +46,7 @@ def add_user(db, user, password):
     cur.execute(q)
     db.commit()
 
-    
+
 @db_f
 def get_userid(db, user):
     id_holder = db.cursor().execute('SELECT id FROM users WHERE username = "' + user + '"')
