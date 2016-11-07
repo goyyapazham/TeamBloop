@@ -62,13 +62,13 @@ def addnewstory():
 @app.route("/updated/<storyid>", methods = ['POST'])
 def updated(storyid):
      userid = sql.get_userid(session["user"])
-     sql.add_update(userid, storyid, request.form["update"])
+     sql.add_update(int(userid), int(storyid), request.form["update"])
      return redirect(url_for('welcome'))
 
   
 @app.route("/update/<storyid>", methods = ['GET'])
 def update(storyid):
-     latestupdate = "" + sql.get_update(int(sql.get_latest_update(int(storyid))))
+     latestupdate = "" + str(sql.get_update(sql.get_latest_update(int(storyid))))
      return render_template("updatestory.html", title = sql.get_title(storyid), latest_update = latestupdate, sid = storyid)
 
    
@@ -92,7 +92,7 @@ def viewstory(storyid):
      storyarray = []
      updateL = sql.get_all_updates(storyid)
      for u in updateL:
-	  storyarray += sql.get_update(u)
+	  storyarray += [sql.get_update(u)]
 	  storystring = ""
      for u in storyarray:
 	  storystring += u + " "

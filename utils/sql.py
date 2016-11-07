@@ -96,7 +96,10 @@ def add_story(db, title, userid, init_update):
 def add_update(db, userid, storyid, content):
     cur = db.cursor()
     upid = next_updateid(db)
-    cur.execute("INSERT INTO updates VALUES (%d, %d, %d, \'%s\')" %(upid, userid, float(storyid), content))
+    cur.execute(
+        "INSERT INTO updates VALUES (%d, %d, %d, \'%s\')" %(upid, userid, float(storyid), content))
+    cur.execute(
+        "UPDATE stories SET latestid = %d WHERE id = %d"%(upid, storyid))
     db.commit()
 
 
