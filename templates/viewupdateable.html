@@ -2,6 +2,7 @@
 <html>
 
 <head>
+	<link rel="stylesheet" type="text/css" href="../static/style.css">
 	<title>Update {{ title }}</title>
 </head>
 
@@ -13,7 +14,7 @@
 		</tr>
 		{% for x in dict%}
     	<tr>
-			<td><a href={{ url_for('update') }}>{{dict[x][0]}}</a></td>
+			<td><a href={{  url_for('update',storyid = x)  }}>{{dict[x][0]}}</a></td>
 			<td>{{dict[x][1]}}</td>
 			
 		</tr>

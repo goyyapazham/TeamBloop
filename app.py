@@ -57,14 +57,23 @@ def updated():
        sql.add_update(userid, request.form["storyID"], request.form["story"])
        return redirect(url_for('welcome'))
 	   
-@app.route("/update/", methods = ['GET'])
-def update():
-	return render_template("updatestory.html")
+@app.route("/update/<storyid>", methods = ['GET'])
+def update(storyid): 
+	latestupdate = "" + sql.get_update(sql.get_latest_update(storyid))[0]
+	return render_template("updatestory.html", title = sql.get_title(storyid), latest_update = latestupdate)
 
 @app.route("/viewupdateable/", methods = ['GET'])
 def viewupdateable():
 	d = {}
-	
+	userid = sql.get_userid(session["user"])
+	storyids = sql.queryL('SELECT storyid FROM updates')
+	ids = []
+	for id in storyids:
+		if not(sql.edited_by(id[0], userid)):
+			ids += [id[0]]
+	for id in ids:
+		author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
+		d[id] = [sql.get_title(id),author]
 	return render_template("viewupdateable.html", dict = d)
 
 @app.route("/viewstory/<storyid>", methods = ['GET'])	  
@@ -72,8 +81,6 @@ def viewstory(storyid):
 	storystring = ""
 	updateL = sql.get_all_updates(storyid)
 	for u in updateL:
-		print sql.get_update(u)
-		print sql.get_update(u)[0]
 		storystring += sql.get_update(u)[0]
 	return render_template("viewstory.html", title = sql.get_title(storyid), story = storystring)
        

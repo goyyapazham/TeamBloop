@@ -37,8 +37,16 @@ def query(db, q):  # for external use, not optimized
     db.commit()
     for i in ret:
         return i[0]
-
-
+		
+@db_f
+def queryL(db, q):  # for external use, not optimized
+	ret = db.cursor().execute(q)
+	db.commit()
+	r = []
+	for i in ret:
+		r += [i]
+	return r
+	
 @db_f
 def add_user(db, user, password):
     cur = db.cursor()
@@ -118,7 +126,7 @@ def edited_by(db, storyid, userid):
 @db_f
 def get_latest_update(db, storyid):
     c_h = db.cursor().execute(
-        'SELECT latestid FROM stories WHERE id = %d'%(storyid))
+        'SELECT latestid FROM stories WHERE id = '+ str(storyid))
     for i in c_h: #  c_h should be a singleton list, ids are unique
         return i[0]
 
