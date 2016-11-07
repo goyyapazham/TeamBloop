@@ -41,12 +41,14 @@ def welcome():
 		d[id] = [sql.get_title(id),author]
 	return render_template("main.html", user = session["user"], dict = d)
 
-@app.route("/newstory/", methods = ['GET'])
-def newstory():
-     return render_template("newstory.html")
+@app.route("/newstory/<message>", methods = ['GET'])
+def newstory(message):
+     return render_template("newstory.html", m = message)
    
 @app.route("/addnewstory/", methods = ['POST'])
 def addnewstory():
+	if not(request.form['title'].isalnum()):
+		return redirect(url_for('newstory', message = "Title has Bad Characters"))
 	userid = sql.get_userid(session["user"])
 	sql.add_story(request.form['title'], userid, request.form['story'])
 	return redirect(url_for('welcome'))
