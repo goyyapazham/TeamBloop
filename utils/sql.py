@@ -32,7 +32,7 @@ def init(db):
 
 
 @db_f
-def query(db, q):
+def query(db, q):  # for external use, not optimized
     ret = db.cursor().execute(q)
     db.commit()
     return ret
@@ -132,6 +132,15 @@ def get_all_updates(db, storyid):
 def get_update(db, updateid):
     with open(str(updateid) + '.txt') as f:
         return f.read()
+
+
+@db_f
+def get_author(db, storyid):
+    updates = get_all_updates(db, storyid)
+    first_update = min(updates)
+    r = db.cursor().execute('SELECT userid FROM updates WHERE id = ' + str(first_update))
+    for i in r:
+        return i[0]
 
 
 @db_f
