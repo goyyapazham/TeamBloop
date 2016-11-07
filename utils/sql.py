@@ -125,8 +125,7 @@ def get_latest_update(db, storyid):
 
 @db_f
 def get_all_updates(db, storyid):
-    return [i[0] for i in db.cursor().execute(
-        'SELECT id FROM updates WHERE storyid = %d'%(storyid))]
+    return [i[0] for i in db.cursor().execute('SELECT id FROM updates WHERE storyid = ' + str(storyid))]
 
 
 @db_f

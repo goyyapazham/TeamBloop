@@ -16,7 +16,7 @@
 		</tr>
 		{% for x in dict%}
     	<tr>
-			<td><a href={{ url_for('viewstory',storyid = 2) }}>{{dict[x][0]}}</a></td>
+			<td><a href={{ url_for('viewstory',storyid = x) }}>{{dict[x][0]}}</a></td>
 			<td>{{dict[x][1]}}</td>
 			
 		</tr>

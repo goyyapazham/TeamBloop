@@ -70,7 +70,11 @@ def update(Title, StoryID):
 
 @app.route("/viewstory/<storyid>", methods = ['GET'])	  
 def viewstory(storyid):
-	return render_template("viewstory.html", title = sql.get_title(storyid), story = "FXN THAT RETRIEVES STORY")
+	storystring = ""
+	updateL = sql.get_all_updates(storyid)
+	for u in updateL:
+		storystring += sql.get_update(u)
+	return render_template("viewstory.html", title = sql.get_title(storyid), story = storystring)
        
 @app.route("/bye/", methods = ['POST'])
 def bye():
