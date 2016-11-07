@@ -7,6 +7,11 @@ f="data/users.db"
 
 def db_f(func):
     def wrapped(*args, **kwargs):  # handles locking and weird db issues
+        try:
+            if isinstance(args[0], sqlite3.Connection):  # db is in args
+                return func(*args, **kwargs)
+        except IndexError:
+            pass
         db = sqlite3.connect(f)
         v = func(db, *args, **kwargs)
         db.close()
@@ -29,7 +34,7 @@ def init(db):
 @db_f
 def add_user(db, user, password):
     cur = db.cursor()
-    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(), user, password)
+    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(db), user, password)
     print q
     cur.execute(q)
     db.commit()
@@ -45,7 +50,7 @@ def get_userid(db, user):
 	
 
 @db_f
-def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
+def get_stories(db, userid, viewing_on=True):
     cur = db.cursor()
     q = '''SELECT updates.storyid FROM updates WHERE
         updates.userid = ''' + str(userid)
@@ -54,26 +59,26 @@ def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
     if viewing_on:
         return sorted(edited)
     else:
-        total = set(range(next_storyid()))
+        total = set(range(next_storyid(db)))
         return sorted(total - set(edited))  # set subtraction is cool
 
 
 @db_f
 def add_story(db, title, userid, init_update):
     cur = db.cursor()
-    newid = next_storyid()
-    newupid = next_updateid()
+    newid = next_storyid(db)
+    newupid = next_updateid(db)
     cur.execute(
         'INSERT INTO stories VALUES (' + str(newid)
         + ', "' + title + '",' + str(newupid) + ')')
     db.commit()
-    add_update(userid, newid, init_update)
+    add_update(db, userid, newid, init_update)
 
 
 @db_f
 def add_update(db, userid, storyid, content):
     cur = db.cursor()
-    upid = next_updateid()
+    upid = next_updateid(db)
     cur.execute("INSERT INTO updates VALUES (%d, %d, %d, \'%s\')"%(upid, userid, storyid, content))
     db.commit()
 
