@@ -35,7 +35,8 @@ def init(db):
 def query(db, q):  # for external use, not optimized
     ret = db.cursor().execute(q)
     db.commit()
-    return ret
+    for i in ret:
+        return i[0]
 
 
 @db_f

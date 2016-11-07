@@ -33,8 +33,14 @@ def reg():
    
 @app.route("/welcome/", methods = ['GET'])
 def welcome():
+	d = {}
 	userid = sql.get_userid(session["user"])
-	d = sql.get_stories(userid, viewing_on=True)
+	ids = sql.get_stories(userid, viewing_on=True)
+	for id in ids:
+		author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
+		d[sql.get_title(id)] = author
+	print "D:"
+	print d
 	return render_template("main.html", user = session["user"], dict = d)
 
 @app.route("/newstory/", methods = ['GET'])
@@ -43,20 +49,20 @@ def newstory():
    
 @app.route("/addnewstory/", methods = ['POST'])
 def addnewstory():
-	userid = get_userid(session["user"])
+	userid = sql.get_userid(session["user"])
 	sql.add_story(request.form['title'], userid, 0)
 	sql.add_update(userid, sql.next_storyid(), request.form['story'])
 	return redirect(url_for('welcome'))
 
 @app.route("/updated/", methods = ['POST'])
 def updated():
-       userid = get_userid(session["user"])
+       userid = sql.get_userid(session["user"])
        sql.add_update(userid, request.form["storyID"], request.form["story"])
        return redirect(url_for('welcome'))
 
 @app.route("/update/", methods = ['GET'])
 def update(Title, StoryID):
-      userid = get_userid(session["user"])
+      userid = sql.get_userid(session["user"])
       cont = is_edited(Title, userid)
       if cont:
           reader = get_all_updates
