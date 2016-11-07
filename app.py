@@ -38,9 +38,7 @@ def welcome():
 	ids = sql.get_stories(userid, viewing_on=True)
 	for id in ids:
 		author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
-		d[sql.get_title(id)] = author
-	print "D:"
-	print d
+		d[id] = [sql.get_title(id),author]
 	return render_template("main.html", user = session["user"], dict = d)
 
 @app.route("/newstory/", methods = ['GET'])
@@ -69,6 +67,10 @@ def update(Title, StoryID):
       else:
           reader = get_latest_update
       return render_template("story.html", title = Title, stuff = reader, con = cont, storyID = StoryID)
+
+@app.route("/viewstory/<storyid>", methods = ['GET'])	  
+def viewstory(storyid):
+	return render_template("viewstory.html", title = sql.get_title(storyid), story = "FXN THAT RETRIEVES STORY")
        
 @app.route("/bye/", methods = ['POST'])
 def bye():

@@ -16,15 +16,15 @@
 		</tr>
 		{% for x in dict%}
     	<tr>
-			<td>{{x}}</td>
-			<td>{{dict[x]}}</td>
+			<td><a href={{ url_for('viewstory',storyid = 2) }}>{{dict[x][0]}}</a></td>
+			<td>{{dict[x][1]}}</td>
 			
 		</tr>
   		{% endfor %}
 	</table>
 	<br>
 	<form action="/bye/" method = "POST" action="login.py">
-		<center><input type= "submit" formaction = "/bye/" value= "Log Out"></center>
+		<center><input type= "submit" value= "Log Out"></center>
     </form>
 
 </body>
