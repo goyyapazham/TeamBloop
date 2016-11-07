@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Update {{ title }}</title>
+</head>
+
+<body>
+	<table style= "width:100%">
+		<tr>
+			<th>Titles</th>
+			<th>Authors</th>
+		</tr>
+		{% for x in dict%}
+    	<tr>
+			<td><a href={{ url_for('update') }}>{{dict[x][0]}}</a></td>
+			<td>{{dict[x][1]}}</td>
+			
+		</tr>
+  		{% endfor %}
+	</table>
+</body>
+
+
+</html>

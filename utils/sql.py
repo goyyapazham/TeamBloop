@@ -130,8 +130,7 @@ def get_all_updates(db, storyid):
 
 @db_f
 def get_update(db, updateid):
-    with open(str(updateid) + '.txt') as f:
-        return f.read()
+    return [i[0] for i in db.cursor().execute('SELECT content FROM updates WHERE storyid = ' + str(updateid))]
 
 
 @db_f
