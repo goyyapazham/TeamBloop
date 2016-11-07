@@ -7,6 +7,8 @@ f="data/users.db"
 
 def db_f(func):
     def wrapped(*args, **kwargs):  # handles locking and weird db issues
+        if args[0] is sqlite3.Connection:  # db is in args
+            return func(*args, **kwargs)
         db = sqlite3.connect(f)
         v = func(db, *args, **kwargs)
         db.close()
@@ -45,7 +47,7 @@ def get_userid(db, user):
 	
 
 @db_f
-def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
+def get_stories(db, userid, viewing_on=True):
     cur = db.cursor()
     q = '''SELECT updates.storyid FROM updates WHERE
         updates.userid = ''' + str(userid)
