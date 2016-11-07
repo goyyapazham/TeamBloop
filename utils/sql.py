@@ -3,8 +3,18 @@ import csv
 
 f="data/users.db"
 
-def init():
-    db = sqlite3.connect(f)
+
+
+def db_f(func):
+    def wrapped(*args, **kwargs):  # handles locking and weird db issues
+        db = sqlite3.connect(f)
+        v = func(db, *args, **kwargs)
+        db.close()
+        return v
+    return wrapped
+
+@db_f
+def init(db):
     cur = db.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT, password TEXT)")
     cur.execute("CREATE TABLE IF NOT EXISTS stories (id INTEGER, title TEXT, latestid INTEGER)")
@@ -14,133 +24,126 @@ def init():
     cur.execute("INSERT INTO users VALUES (-1, '', '')")
     # need base, unused data to do next id functions
     db.commit()
-    db.close()
-    
 
-def add_user(user, password):
-    db = sqlite3.connect(f)
+
+@db_f
+def add_user(db, user, password):
     cur = db.cursor()
-    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(db), user, password)
+    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(), user, password)
     print q
     cur.execute(q)
     db.commit()
-    db.close()
 
     
-def get_userid(user):
-    db = sqlite3.connect(f)
-    id_holder = db.cursor().execute('SELECT id FROM users WHERE username = ' + user)
+@db_f
+def get_userid(db, user):
+    id_holder = db.cursor().execute('SELECT id FROM users WHERE username = "' + user + '"')
     L = []
     for row in id_holder:
-        L += [id_holder]
-    db.commit()
-    db.close()
-    return L
+        return row[0] 
     
 	
 
-def get_stories(userid, viewing_on=True):  # XXX viewing_on not implemented
-    db = sqlite3.connect(f)
+@db_f
+def get_stories(db, userid, viewing_on=True):  # XXX viewing_on not implemented
     cur = db.cursor()
-    if viewing_on:
-        q = '''SELECT updates.storyid FROM updates WHERE
+    q = '''SELECT updates.storyid FROM updates WHERE
         updates.userid = ''' + str(userid)
     res = cur.execute(q)
-    db.close()
-    return [i[0] for i in res]
+    edited = [i[0] for i in res]
+    if viewing_on:
+        return sorted(edited)
+    else:
+        total = set(range(next_storyid()))
+        return sorted(total - set(edited))  # set subtraction is cool
 
 
-def add_story(title, userid, init_update):
-    db = sqlite3.connect(f)
+@db_f
+def add_story(db, title, userid, init_update):
     cur = db.cursor()
-    newid = next_storyid(db)
-    newupid = next_updateid(db)
+    newid = next_storyid()
+    newupid = next_updateid()
     cur.execute(
         'INSERT INTO stories VALUES (' + str(newid)
         + ', "' + title + '",' + str(newupid) + ')')
     db.commit()
-    add_update(db, userid, newid, init_update)
-    db.close()
+    add_update(userid, newid, init_update)
 
 
-def add_update(userid, storyid, content):
-    db = sqlite3.connect(f)
+@db_f
+def add_update(db, userid, storyid, content):
     cur = db.cursor()
-    upid = next_updateid(db)
+    upid = next_updateid()
     cur.execute("INSERT INTO updates VALUES (%d, %d, %d, \'%s\')"%(upid, userid, storyid, content))
     db.commit()
-    db.close()
 
 
-def get_title(storyid):
-    db = sqlite3.connect(f)
+@db_f
+def get_title(db, storyid):
     title_holder = db.cursor().execute(
         'SELECT title FROM stories WHERE id = ' + str(storyid))
     for i in title_holder:
         return i[0]
 
 
-def get_all_users():
-    db = sqlite3.connect(f)
+@db_f
+def get_all_users(db):
     cur = db.cursor()
     res = cur.execute("SELECT * FROM users")
     L = []
     for row in res:
         L += [[row[1],row[2]]]
     db.commit()
-    db.close()
     return L
 
-# XXX idg this fxn
-def is_edited(db, storyid, userid):
+
+@db_f
+def edited_by(db, storyid, userid):
     return storyid in get_stories(db, userid)
 
 
-# XXX yo gabe what this do?? won't it only return the first i[0] then exit
+@db_f
 def get_latest_update(db, storyid):
     c_h = db.cursor().execute(
         'SELECT latestid FROM stories WHERE id = %d'%(storyid))
-    for i in c_h:
+    for i in c_h: #  c_h should be a singleton list, ids are unique
         return i[0]
 
 
+@db_f
 def get_all_updates(db, storyid):
     return [i[0] for i in db.cursor().execute(
         'SELECT id FROM updates WHERE storyid = %d'%(storyid))]
 
 
-def get_update(updateid):
+@db_f
+def get_update(db, updateid):
     with open(str(updateid) + '.txt') as f:
         return f.read()
 
-    
+
+@db_f
 def next_updateid(db):
     uids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM updates')]
     return max(uids) + 1
 
 
-def next_storyid():
+@db_f
+def next_storyid(db):
     sids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM stories')]
     return max(sids) + 1
 
 
+@db_f
 def next_userid(db):
     uids = [i[0] for i in db.cursor().execute(
         'SELECT id FROM users')]
     return max(uids) + 1
 
 
-run_init = False
-db = sqlite3.connect(f)
-cur = db.cursor()
-res = cur.execute("SELECT id FROM users")
 try:
-    if res[0] != -1:
-        run_init = True
+    init()
 except:
-    if run_init:
-        init()
-db.commit()
-db.close()
+    pass
