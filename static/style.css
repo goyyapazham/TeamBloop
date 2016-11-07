@@ -1,3 +1,9 @@
+body {
+    font-family: andale mono;
+    padding:100px;
+    background:#9cace0;
+}
+
 ul {
     list-style-type: none;
     margin: 0;

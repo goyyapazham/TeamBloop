@@ -2,23 +2,24 @@
 <html>
 
   <head>
+    <link rel="stylesheet" type="text/css" href="static/style.css">
     <title>Welcome</title>
   </head>
 
   <body>
-        <center><h2>WELCOME</h2></center>
-        <center><h4>Login or Register<h4><center>
-        <form action="/authenticate/" method = "POST" action="login.py">
-                <center><input type = "text" name = "user" placeholder = "Username" required></center>
-                <br>
-                <center><input type = "password" name = "password" placeholder = "Password" required></center>
-                <br>
-                <center><input type= "submit" value= "Login"></center>
-                <br>
-                <center><input type= "submit" formaction = "/reg/" value= "Register"></center>
-        </form>
-		<br>
-		{{message}}       
+    <center><h2>WELCOME</h2></center>
+    <center><h4>Login or Register<h4><center>
+    <form action="/authenticate/" method = "POST" action="login.py">
+      <center><input type = "text" name = "user" placeholder = "Username" required></center>
+      <br>
+      <center><input type = "password" name = "password" placeholder = "Password" required></center>
+      <br>
+      <center><input type= "submit" value= "Login"></center>
+      <br>
+      <center><input type= "submit" formaction = "/reg/" value= "Register"></center>
+    </form>
+    <br>
+    {{message}}       
   </body>
 
 </html>

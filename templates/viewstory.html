@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-	<title>Read {{ title }}</title>
-</head>
+  <head>
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <title>Read {{ title }}</title>
+  </head>
 
-<body>
-	<h2><center>{{ title }}</center></h2>
-	<p><center>
-	    {% for x in story %}
-	    {{ x }}
-	    <br>
-	    <br>
-	    {% endfor %}
-	</center></p>
+  <body>
+    <h2><center>{{ title }}</center></h2>
+    <p><center>
+	{% for x in story %}
+	{{ x }}
+	<br>
+	<br>
+	{% endfor %}
+    </center></p>
 
-	<center>
-	<br><br>
-	<a href="/welcome/">Go back home!</a>
-	</center>
-</body>
+    <center>
+      <br><br>
+      <a href="/welcome/">Go back home!</a>
+    </center>
+  </body>
 
 
 </html>

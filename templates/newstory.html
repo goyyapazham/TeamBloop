@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-	<title>Start a New Story</title>
+  <head>
+    <link rel="stylesheet" type="text/css" href="../static/style.css">
+    <title>Start a New Story</title>
 </head>
 
 <body>
-	<h3><center>Start a New Story!</center></h3>
-	<form action="/addnewstory/" method = "POST" action="login.py">
-		<center><input type = "text" name = "title" placeholder = "Title" required></center>
-		<br>
-		<center>
-			<textarea rows="4" cols="50" name="story" placeholder = "Begin Writing..."></textarea>
-		</center>
-		<br>
-		<center><input type= "submit" value= "Submit Story"></center>
-    </form>
-	<br>
-	<center>{{ m }}</center>
-	<br>
-	<form action="/bye/" method = "POST" action="login.py">
-		<center><input type= "submit" formaction = "/bye/" value= "Log Out"></center>
-    </form>
-
-	<center>
-	<br><br>
-	<a href="/welcome/">Go back home!</a>
-	</center>
-
+  <h3><center>Start a New Story!</center></h3>
+  <form action="/addnewstory/" method = "POST" action="login.py">
+    <center><input type = "text" name = "title" placeholder = "Title" required></center>
+    <br>
+    <center>
+      <textarea rows="4" cols="50" name="story" placeholder = "Begin Writing..."></textarea>
+    </center>
+    <br>
+    <center><input type= "submit" value= "Submit Story"></center>
+  </form>
+  <br>
+  <center>{{ m }}</center>
+  <br>
+  <form action="/bye/" method = "POST" action="login.py">
+    <center><input type= "submit" formaction = "/bye/" value= "Log Out"></center>
+  </form>
+  
+  <center>
+    <br><br>
+    <a href="/welcome/">Go back home!</a>
+  </center>
+  
 </body>
 
 
