@@ -21,9 +21,9 @@ def db_f(func):
 @db_f
 def init(db):
     cur = db.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS users (id INTEGER, username TEXT, password TEXT)")
-    cur.execute("CREATE TABLE IF NOT EXISTS stories (id INTEGER, title TEXT, latestid INTEGER)")
-    cur.execute("CREATE TABLE IF NOT EXISTS updates (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)")
+    cur.execute("CREATE TABLE users (id INTEGER, username TEXT, password TEXT)")
+    cur.execute("CREATE TABLE stories (id INTEGER, title TEXT, latestid INTEGER)")
+    cur.execute("CREATE TABLE updates (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)")
     cur.execute("INSERT INTO stories VALUES (-1, '', -1)")
     cur.execute("INSERT INTO updates VALUES (-1, -1, -1, '')")
     cur.execute("INSERT INTO users VALUES (-1, '', '')")
@@ -37,7 +37,8 @@ def query(db, q):  # for external use, not optimized
     db.commit()
     for i in ret:
         return i[0]
-		
+
+    
 @db_f
 def queryL(db, q):  # for external use, not optimized
 	ret = db.cursor().execute(q)
@@ -46,7 +47,8 @@ def queryL(db, q):  # for external use, not optimized
 	for i in ret:
 		r += [i]
 	return r
-	
+
+    
 @db_f
 def add_user(db, user, password):
     cur = db.cursor()
@@ -62,9 +64,8 @@ def get_userid(db, user):
     L = []
     for row in id_holder:
         return row[0] 
-    
-	
 
+    
 @db_f
 def get_stories(db, userid, viewing_on=True):
     cur = db.cursor()
@@ -126,7 +127,7 @@ def edited_by(db, storyid, userid):
 @db_f
 def get_latest_update(db, storyid):
     c_h = db.cursor().execute(
-        'SELECT latestid FROM stories WHERE id = '+ str(storyid))
+        'SELECT latestid FROM stories WHERE id = %d'%(storyid))
     for i in c_h: #  c_h should be a singleton list, ids are unique
         return i[0]
 
@@ -138,7 +139,10 @@ def get_all_updates(db, storyid):
 
 @db_f
 def get_update(db, updateid):
-    return [i[0] for i in db.cursor().execute('SELECT content FROM updates WHERE storyid = ' + str(updateid))]
+    c_h = db.cursor().execute(
+        'SELECT content FROM updates WHERE id = %d'%(updateid))
+    for i in c_h: #  c_h should be a singleton list, ids are unique
+        return i[0]
 
 
 @db_f
