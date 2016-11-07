@@ -34,7 +34,7 @@ def reg():
 @app.route("/welcome/", methods = ['GET'])
 def welcome():
 	userid = sql.get_userid(session["user"])
-	d = get_stories(userid, viewing_on=True)
+	d = sql.get_stories(userid, viewing_on=True)
 	return render_template("main.html", user = session["user"], dict = d)
 
 @app.route("/newstory/", methods = ['GET'])
@@ -47,7 +47,23 @@ def addnewstory():
 	sql.add_story(request.form['title'], userid, 0)
 	sql.add_update(userid, sql.next_storyid(), request.form['story'])
 	return redirect(url_for('welcome'))
-   
+
+@app.route("/updated/", methods = ['POST'])
+def updated():
+       userid = get_userid(session["user"])
+       sql.add_update(userid, request.form["storyID"], request.form["story"])
+       return redirect(url_for('welcome'))
+
+@app.route("/update/", methods = ['GET'])
+def update(Title, StoryID):
+      userid = get_userid(session["user"])
+      cont = is_edited(Title, userid)
+      if cont:
+          reader = get_all_updates
+      else:
+          reader = get_latest_update
+      return render_template("story.html", title = Title, stuff = reader, con = cont, storyID = StoryID)
+       
 @app.route("/bye/", methods = ['POST'])
 def bye():
      if "user" in session:
