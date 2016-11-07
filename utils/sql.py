@@ -1,183 +1,111 @@
-import sqlite3
-import csv
+from flask import Flask, render_template, request, session, redirect, url_for
+from utils import register, sql
+import os, sqlite3
 
 f="data/users.db"
+db = sqlite3.connect(f) #open if f exists, otherwise create
+c = db.cursor()
+
+app = Flask(__name__)
+
+app.secret_key = os.urandom(32)
+@app.route("/")
+def main():
+     if "user" in session:
+          return redirect(url_for('welcome'))
+     return render_template("login.html")
 
 
-def db_f(func):
-    def wrapped(*args, **kwargs):  # handles locking and weird db issues
-        try:
-            if isinstance(args[0], sqlite3.Connection):  # db is in args
-                return func(*args, **kwargs)
-        except IndexError:
-            pass
-        db = sqlite3.connect(f)
-        v = func(db, *args, **kwargs)
-        db.close()
-        return v
-    return wrapped
+@app.route("/authenticate/", methods = ['POST'])
+def auth():
+     s = register.login(request.form["user"],request.form["password"])
+     if s == "Welcome":
+          session["user"] = request.form["user"]
+          return redirect(url_for('welcome'))
+     return render_template("login.html", message = s)
 
 
-@db_f
-def init(db):
-    cur = db.cursor()
-    cur.execute("CREATE TABLE users (id INTEGER, username TEXT, password TEXT)")
-    cur.execute("CREATE TABLE stories (id INTEGER, title TEXT, latestid INTEGER)")
-    cur.execute("CREATE TABLE updates (id INTEGER, userid INTEGER, storyid INTEGER, content TEXT)")
-    cur.execute("INSERT INTO stories VALUES (-1, '', -1)")
-    cur.execute("INSERT INTO updates VALUES (-1, -1, -1, '')")
-    cur.execute("INSERT INTO users VALUES (-1, '', '')")
-    # need base, unused data to do next id functions
-    db.commit()
+@app.route("/reg/", methods = ['POST'])
+def reg():
+     s = register.regi(request.form["user"],request.form["password"])
+     if s == "Added":
+          session["user"] = request.form["user"]
+          return redirect(url_for('welcome'))
+     return render_template("login.html", message = s)
 
 
-@db_f
-def query(db, q):  # for external use, not optimized
-    ret = db.cursor().execute(q)
-    db.commit()
-    for i in ret:
-        return i[0]
+@app.route("/welcome/", methods = ['GET'])
+def welcome():
+	d = {}
+	userid = sql.get_userid(session["user"])
+	ids = sql.get_stories(userid, viewing_on=True)
+	for id in ids:
+		author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
+		d[id] = [sql.get_title(id),author]
+	return render_template("main.html", user = session["user"], dict = d)
 
-    
-@db_f
-def queryL(db, q):  # for external use, not optimized
-	ret = db.cursor().execute(q)
-	db.commit()
-	r = []
-	for i in ret:
-		r += [i]
-	return r
-
-    
-@db_f
-def add_user(db, user, password):
-    cur = db.cursor()
-    q = "INSERT INTO users VALUES (%d, \'%s\', \'%s\')"%(next_userid(db), user, password)
-    print q
-    cur.execute(q)
-    db.commit()
+   
+@app.route("/newstory/<message>", methods = ['GET'])
+def newstory(message):
+     return render_template("newstory.html", m = message)
 
 
-@db_f
-def get_userid(db, user):
-    id_holder = db.cursor().execute(
-        "SELECT id FROM users WHERE username = \'%s\'"%(user))
-    for row in id_holder:
-        return row[0] 
+@app.route("/addnewstory/", methods = ['POST'])
+def addnewstory():
+	if not(request.form['title'].isalnum()):
+		return redirect(url_for('newstory', message = "Title has Bad Characters"))
+	userid = sql.get_userid(session["user"])
+	sql.add_story(request.form['title'], userid, request.form['story'])
+	return redirect(url_for('welcome'))
 
-    
-@db_f
-def get_stories(db, userid, viewing_on=True):
-    cur = db.cursor()
-    q = "SELECT updates.storyid FROM updates WHERE updates.userid = \'%d\'"%(int(userid))
-    res = cur.execute(q)
-    edited = [i[0] for i in res]
-    if viewing_on:
-        return sorted(edited)
-    else:
-        total = set(range(next_storyid(db)))
-        return sorted(total - set(edited))  # set subtraction is cool
+   
+@app.route("/updated/<storyid>", methods = ['POST'])
+def updated(storyid):
+       userid = sql.get_userid(session["user"])
+       sql.add_update(userid, storyid, request.form["update"])
+       return redirect(url_for('welcome'))
 
+  
+@app.route("/update/<storyid>", methods = ['GET'])
+def update(storyid):
+	latestupdate = "" + sql.get_update(int(sql.get_latest_update(int(storyid))))
+	return render_template("updatestory.html", title = sql.get_title(storyid), latest_update = latestupdate, sid = storyid)
 
-@db_f
-def add_story(db, title, userid, init_update):
-    cur = db.cursor()
-    newid = next_storyid(db)
-    newupid = next_updateid(db)
-    cur.execute(
-        "INSERT INTO stories VALUES (%d, \'%s\', %d)"%(newid, title, newupid))
-    db.commit()
-    add_update(db, userid, newid, init_update)
+   
+@app.route("/viewupdateable/", methods = ['GET'])
+def viewupdateable():
+	d = {}
+	userid = sql.get_userid(session["user"])
+	storyids = sql.queryL('SELECT storyid FROM updates')
+	ids = []
+	for id in storyids:
+		if not(sql.edited_by(id[0], userid)):
+			ids += [id[0]]
+	for id in ids:
+		author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
+		d[id] = [sql.get_title(id),author]
+	return render_template("viewupdateable.html", dict = d)
 
+   
+@app.route("/viewstory/<storyid>", methods = ['GET'])	  
+def viewstory(storyid):
+	storyarray = []
+	updateL = sql.get_all_updates(storyid)
+	for u in updateL:
+		storyarray += sql.get_update(u)
+	storystring = ""
+	for u in storyarray:
+		storystring += u + " "
+	return render_template("viewstory.html", title = sql.get_title(storyid), story = storystring)
 
-@db_f
-def add_update(db, userid, storyid, content):
-    cur = db.cursor()
-    upid = next_updateid(db)
-    cur.execute(
-        "INSERT INTO updates VALUES (%d, %d, %d, \'%s\')" %(upid, userid, int(storyid), content))
-    db.commit()
+   
+@app.route("/bye/", methods = ['POST'])
+def bye():
+     if "user" in session:
+          session.pop("user")
+     return redirect(url_for('main'))
 
-
-@db_f
-def get_title(db, storyid):
-    title_holder = db.cursor().execute(
-        "SELECT title FROM stories WHERE id = %d"%(int(storyid)))
-    for i in title_holder:
-        return i[0]
-
-
-@db_f
-def get_all_users(db):
-    cur = db.cursor()
-    res = cur.execute("SELECT * FROM users")
-    L = []
-    for row in res:
-        L += [[row[1],row[2]]]
-    db.commit()
-    return L
-
-
-@db_f
-def edited_by(db, storyid, userid):
-    return storyid in get_stories(db, userid)
-
-
-@db_f
-def get_latest_update(db, storyid):
-    c_h = db.cursor().execute(
-        'SELECT latestid FROM stories WHERE id = %d'%(storyid))
-    for i in c_h: #  c_h should be a singleton list, ids are unique
-        return i[0]
-
-
-@db_f
-def get_all_updates(db, storyid):
-    c_h = db.cursor().execute(
-        'SELECT id FROM updates WHERE storyid = %d'%(storyid))
-    for i in c_h: #  c_h should be a singleton list, ids are unique
-        return i[0]
-
-
-@db_f
-def get_update(db, updateid):
-    c_h = db.cursor().execute(
-        'SELECT content FROM updates WHERE id = %d'%(updateid))
-    for i in c_h: #  c_h should be a singleton list, ids are unique
-        return i[0]
-
-
-@db_f
-def get_author(db, storyid):
-    updates = get_all_updates(db, storyid)
-    first_update = min(updates)
-    r = db.cursor().execute('SELECT userid FROM updates WHERE id = ' + str(first_update))
-    for i in r:
-        return i[0]
-
-
-@db_f
-def next_updateid(db):
-    uids = [i[0] for i in db.cursor().execute(
-        'SELECT id FROM updates')]
-    return max(uids) + 1
-
-
-@db_f
-def next_storyid(db):
-    sids = [i[0] for i in db.cursor().execute(
-        'SELECT id FROM stories')]
-    return max(sids) + 1
-
-
-@db_f
-def next_userid(db):
-    uids = [i[0] for i in db.cursor().execute(
-        'SELECT id FROM users')]
-    return max(uids) + 1
-
-
-try:
-    init()
-except:
-    pass
+  
+if __name__ =="__main__":
+     app.debug=True
+     app.run()

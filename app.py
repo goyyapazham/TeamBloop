@@ -40,7 +40,7 @@ def welcome():
      userid = sql.get_userid(session["user"])
      ids = sql.get_stories(userid, viewing_on=True)
      for id in ids:
-	  author = sql.query('SELECT username FROM users WHERE id = ' + str(sql.get_author(id)))
+	  author = sql.query("SELECT username FROM users WHERE id = %d"%(sql.get_author(id)))
 	  d[id] = [sql.get_title(id),author]
      return render_template("main.html", user = session["user"], dict = d)
 
